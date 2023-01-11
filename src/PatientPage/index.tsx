@@ -19,7 +19,7 @@ import { Patient } from "../types";
 
 const PatientPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [{ patients }, dispatch] = useStateValue();
+  const [{ diagnoses, patients }, dispatch] = useStateValue();
 
   const patient = id ? patients[id] : null;
 
@@ -100,6 +100,11 @@ const PatientPage = () => {
                           {diagnosisCode}
                         </Avatar>
                       </ListItemAvatar>
+                      <Tooltip title={diagnoses[diagnosisCode]?.latin || ""}>
+                        <Typography>
+                          {diagnoses[diagnosisCode]?.name}
+                        </Typography>
+                      </Tooltip>
                     </ListItem>
                   ))}
                 </List>
