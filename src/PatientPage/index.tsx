@@ -1,4 +1,14 @@
-import { Chip, Grid, Tooltip, Typography } from "@material-ui/core";
+import {
+  Avatar,
+  Card,
+  Chip,
+  Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
+  Tooltip,
+  Typography,
+} from "@material-ui/core";
 import { CalendarToday, Wc, PermIdentity, Work } from "@material-ui/icons";
 import axios from "axios";
 import { useEffect } from "react";
@@ -62,6 +72,40 @@ const PatientPage = () => {
               icon={<CalendarToday />}
             ></Chip>
           </Tooltip>
+        </Grid>
+      )}
+      {patient.entries && (
+        <Grid item xs={12}>
+          <Typography variant="h5">Entries</Typography>
+          {!patient.entries.length && (
+            <Typography>No entries to display.</Typography>
+          )}
+          {patient.entries.map((entry) => (
+            <Card key={entry.id} style={{ marginTop: 10, padding: 20 }}>
+              <Tooltip title="Date">
+                <Chip
+                  label={new Date(entry.date).toLocaleDateString()}
+                  icon={<CalendarToday />}
+                ></Chip>
+              </Tooltip>
+              <Typography style={{ marginTop: 10 }}>
+                {entry.description}
+              </Typography>
+              {entry.diagnosisCodes && (
+                <List>
+                  {entry.diagnosisCodes.map((diagnosisCode) => (
+                    <ListItem key={diagnosisCode}>
+                      <ListItemAvatar>
+                        <Avatar style={{ fontSize: "0.75em" }}>
+                          {diagnosisCode}
+                        </Avatar>
+                      </ListItemAvatar>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Card>
+          ))}
         </Grid>
       )}
     </Grid>
