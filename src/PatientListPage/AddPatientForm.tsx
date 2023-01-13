@@ -1,7 +1,7 @@
 import React from "react";
 import { Field, Formik, Form } from "formik";
 
-import { TextField, SelectField, GenderOption } from "../components/FormFields";
+import { TextField, SelectField, SelectOption } from "../components/FormFields";
 import { Gender, Patient } from "../types";
 import { FormActions } from "../components/FormActions";
 import { FormProps } from "../components/FormModal";
@@ -12,7 +12,7 @@ import { FormProps } from "../components/FormModal";
  */
 export type PatientFormValues = Omit<Patient, "id" | "entries">;
 
-const genderOptions: GenderOption[] = [
+const genderOptions: SelectOption<Gender>[] = [
   { value: Gender.Male, label: "Male" },
   { value: Gender.Female, label: "Female" },
   { value: Gender.Other, label: "Other" },
