@@ -1,16 +1,65 @@
-import { Chip, Grid, Tooltip, Typography } from "@material-ui/core";
+import { Button, Chip, Grid, Tooltip, Typography } from "@material-ui/core";
 import { CalendarToday, Wc, PermIdentity, Work } from "@material-ui/icons";
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import FormModal from "../components/FormModal";
 import { apiBaseUrl } from "../constants";
-import { addPatient, useStateValue } from "../state";
-import { Patient } from "../types";
+import { addEntry, addPatient, useStateValue } from "../state";
+import { Entry, Patient } from "../types";
+import AddEntryForm, { EntryFormValues } from "./AddEntryForm";
 import { EntryDetails } from "./EntryDetails";
+
+const usePatientEntryModal = (id: Patient["id"] | undefined) => {
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [error, setError] = useState<string>();
+  const [, dispatch] = useStateValue();
+
+  const openModal = (): void => {
+    setModalOpen(true);
+  };
+
+  const closeModal = (): void => {
+    setModalOpen(false);
+    setError(undefined);
+  };
+
+  const submit = async (values: EntryFormValues) => {
+    if (!id) return;
+
+    try {
+      const { data: newEntry } = await axios.post<Entry>(
+        `${apiBaseUrl}/patients/${id}/entries`,
+        values
+      );
+      dispatch(addEntry(id, newEntry));
+      closeModal();
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        console.error(e?.response?.data || "Unrecognized axios error");
+        setError(
+          String(e?.response?.data?.error) || "Unrecognized axios error"
+        );
+      } else {
+        console.error("Unknown error", e);
+        setError("Unknown error");
+      }
+    }
+  };
+
+  return {
+    open: openModal,
+    close: closeModal,
+    isOpen: modalOpen,
+    error,
+    submit,
+  };
+};
 
 const PatientPage = () => {
   const { id } = useParams<{ id: string }>();
   const [{ patients }, dispatch] = useStateValue();
+  const modal = usePatientEntryModal(id);
 
   const patient = id ? patients[id] : null;
 
@@ -68,6 +117,21 @@ const PatientPage = () => {
       {patient.entries && (
         <Grid item xs={12}>
           <Typography variant="h5">Entries</Typography>
+          <FormModal
+            title="Add a new entry"
+            modalOpen={modal.isOpen}
+            onSubmit={modal.submit}
+            error={modal.error}
+            onClose={modal.close}
+            formComponent={AddEntryForm}
+          />
+          <Button
+            variant="contained"
+            onClick={modal.open}
+            style={{ marginTop: 10, marginBottom: 10 }}
+          >
+            Add entry
+          </Button>
           {!patient.entries.length && (
             <Typography>No entries to display.</Typography>
           )}
