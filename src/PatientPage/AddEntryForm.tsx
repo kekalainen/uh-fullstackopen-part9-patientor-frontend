@@ -11,6 +11,13 @@ import { FormProps } from "../components/FormModal";
 
 export type EntryFormValues = Omit<Entry, "id">;
 
+const typeOptions: SelectOption<Entry["type"]>[] = [
+  ...EntryTypes.map((type) => ({
+    value: type,
+    label: type.split(/(?=[A-Z])/).join(" "),
+  })),
+];
+
 const healthCheckOptions: SelectOption<HealthCheckRating>[] = [
   ...Object.values(HealthCheckRating)
     .slice(Object.values(HealthCheckRating).length / 2)
@@ -43,6 +50,13 @@ const typeSpecificInitialValues = (type: Entry["type"]): object => {
       return {
         healthCheckRating: HealthCheckRating.Healthy,
       };
+    case "Hospital":
+      return {
+        discharge: {
+          date: "",
+          criteria: "",
+        },
+      };
     default:
       return {};
   }
@@ -61,8 +75,14 @@ export const AddEntryForm = ({
         date: "",
         specialist: "",
         diagnosisCodes: [],
-        type: EntryTypes[0],
-        ...typeSpecificInitialValues(EntryTypes[0]),
+        type: EntryTypes[0] as Entry["type"],
+        ...EntryTypes.reduce(
+          (values, type) => ({
+            ...values,
+            ...typeSpecificInitialValues(type),
+          }),
+          {}
+        ),
       }}
       onSubmit={onSubmit}
       validate={(values) => {
@@ -101,12 +121,30 @@ export const AddEntryForm = ({
             setFieldValue={setFieldValue}
             setFieldTouched={setFieldTouched}
           />
+          <SelectField name="type" label="Type" options={typeOptions} />
           {values.type === "HealthCheck" && (
             <SelectField
               name="healthCheckRating"
               label="Rating"
               options={healthCheckOptions}
             />
+          )}
+          {values.type === "Hospital" && (
+            <>
+              <Field
+                label="Discharge date"
+                placeholder="YYYY-MM-DD"
+                name="discharge.date"
+                component={TextField}
+                validate={validators.date}
+              ></Field>
+              <Field
+                label="Discharge criteria"
+                name="discharge.criteria"
+                component={TextField}
+                validate={validators.required}
+              ></Field>
+            </>
           )}
           <FormActions dirty={dirty} isValid={isValid} onCancel={onCancel} />
         </Form>
