@@ -85,17 +85,6 @@ export const AddEntryForm = ({
         ),
       }}
       onSubmit={onSubmit}
-      validate={(values) => {
-        const errors: Dictionary<string> = {};
-
-        for (const key of Object.keys(values)) {
-          const value = { ...values }[key];
-          if (typeof value === "string" && value.length === 0)
-            errors[key] = validationErrorMessages.required;
-        }
-
-        return errors;
-      }}
     >
       {({ isValid, dirty, setFieldValue, setFieldTouched, values }) => (
         <Form>
@@ -103,6 +92,7 @@ export const AddEntryForm = ({
             label="Description"
             name="description"
             component={TextField}
+            validate={validators.required}
           ></Field>
           <Field
             label="Date"
@@ -115,6 +105,7 @@ export const AddEntryForm = ({
             label="Specialist"
             name="specialist"
             component={TextField}
+            validate={validators.required}
           ></Field>
           <DiagnosisSelectionField
             diagnoses={Object.values(diagnoses)}
@@ -122,30 +113,38 @@ export const AddEntryForm = ({
             setFieldTouched={setFieldTouched}
           />
           <SelectField name="type" label="Type" options={typeOptions} />
-          {values.type === "HealthCheck" && (
-            <SelectField
-              name="healthCheckRating"
-              label="Rating"
-              options={healthCheckOptions}
-            />
-          )}
-          {values.type === "Hospital" && (
-            <>
-              <Field
-                label="Discharge date"
-                placeholder="YYYY-MM-DD"
-                name="discharge.date"
-                component={TextField}
-                validate={validators.date}
-              ></Field>
-              <Field
-                label="Discharge criteria"
-                name="discharge.criteria"
-                component={TextField}
-                validate={validators.required}
-              ></Field>
-            </>
-          )}
+          {((): JSX.Element | null => {
+            switch (values.type) {
+              case "HealthCheck":
+                return (
+                  <SelectField
+                    name="healthCheckRating"
+                    label="Rating"
+                    options={healthCheckOptions}
+                  />
+                );
+              case "Hospital":
+                return (
+                  <>
+                    <Field
+                      label="Discharge date"
+                      placeholder="YYYY-MM-DD"
+                      name="discharge.date"
+                      component={TextField}
+                      validate={validators.date}
+                    ></Field>
+                    <Field
+                      label="Discharge criteria"
+                      name="discharge.criteria"
+                      component={TextField}
+                      validate={validators.required}
+                    ></Field>
+                  </>
+                );
+              default:
+                return null;
+            }
+          })()}
           <FormActions dirty={dirty} isValid={isValid} onCancel={onCancel} />
         </Form>
       )}
