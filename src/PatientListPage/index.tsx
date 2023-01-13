@@ -3,9 +3,7 @@ import axios from "axios";
 import { Box, Table, Button, TableHead, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
 
-import AddPatientForm, {
-  PatientFormValues,
-} from "../AddPatientModal/AddPatientForm";
+import AddPatientForm, { PatientFormValues } from "./AddPatientForm";
 import { Patient } from "../types";
 import { apiBaseUrl } from "../constants";
 import FormModal from "../components/FormModal";
