@@ -1,4 +1,6 @@
+import { Checkbox, FormControlLabel, FormGroup, Grid } from "@material-ui/core";
 import { Field, Form, Formik } from "formik";
+import { useState } from "react";
 import {
   DiagnosisSelection as DiagnosisSelectionField,
   TextField,
@@ -7,6 +9,7 @@ import { FormActions } from "../components/FormActions";
 import { SelectField, SelectOption } from "../components/FormFields";
 import { useStateValue } from "../state";
 import { Entry, EntryTypes, HealthCheckRating } from "../types";
+import { assertNever } from "../utils";
 import { FormProps } from "../components/FormModal";
 
 export type EntryFormValues = Omit<Entry, "id">;
@@ -57,8 +60,16 @@ const typeSpecificInitialValues = (type: Entry["type"]): object => {
           criteria: "",
         },
       };
+    case "OccupationalHealthcare":
+      return {
+        employerName: "",
+        sickLeave: {
+          startDate: "",
+          endDate: "",
+        },
+      };
     default:
-      return {};
+      return assertNever(type);
   }
 };
 
@@ -67,6 +78,7 @@ export const AddEntryForm = ({
   onCancel,
 }: FormProps<EntryFormValues>) => {
   const [{ diagnoses }] = useStateValue();
+  const [sickLeave, setSickLeave] = useState<boolean>(false);
 
   return (
     <Formik
@@ -84,7 +96,11 @@ export const AddEntryForm = ({
           {}
         ),
       }}
-      onSubmit={onSubmit}
+      onSubmit={(values) => {
+        if (!sickLeave && "sickLeave" in values)
+          onSubmit({ ...values, sickLeave: undefined } as EntryFormValues);
+        else onSubmit(values);
+      }}
     >
       {({ isValid, dirty, setFieldValue, setFieldTouched, values }) => (
         <Form>
@@ -113,7 +129,7 @@ export const AddEntryForm = ({
             setFieldTouched={setFieldTouched}
           />
           <SelectField name="type" label="Type" options={typeOptions} />
-          {((): JSX.Element | null => {
+          {((): JSX.Element => {
             switch (values.type) {
               case "HealthCheck":
                 return (
@@ -141,8 +157,50 @@ export const AddEntryForm = ({
                     ></Field>
                   </>
                 );
+              case "OccupationalHealthcare":
+                return (
+                  <>
+                    <Field
+                      label="Employer"
+                      name="employerName"
+                      component={TextField}
+                      validate={validators.required}
+                    ></Field>
+                    <FormGroup>
+                      <FormControlLabel
+                        label="Sick leave"
+                        control={
+                          <Checkbox
+                            checked={sickLeave}
+                            onChange={(_, checked) => setSickLeave(checked)}
+                          />
+                        }
+                      />
+                    </FormGroup>
+                    {sickLeave && (
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <Field
+                            label="Sick leave start date"
+                            name="sickLeave.startDate"
+                            component={TextField}
+                            validate={validators.date}
+                          ></Field>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            label="Sick leave end date"
+                            name="sickLeave.endDate"
+                            component={TextField}
+                            validate={validators.date}
+                          ></Field>
+                        </Grid>
+                      </Grid>
+                    )}
+                  </>
+                );
               default:
-                return null;
+                return assertNever(values.type);
             }
           })()}
           <FormActions dirty={dirty} isValid={isValid} onCancel={onCancel} />
