@@ -4,6 +4,7 @@ import { Field, Formik, Form } from "formik";
 
 import { TextField, SelectField, GenderOption } from "../components/FormFields";
 import { Gender, Patient } from "../types";
+import { FormProps } from "../components/FormModal";
 
 /*
  * use type Patient, but omit id and entries,
@@ -11,18 +12,13 @@ import { Gender, Patient } from "../types";
  */
 export type PatientFormValues = Omit<Patient, "id" | "entries">;
 
-interface Props {
-  onSubmit: (values: PatientFormValues) => void;
-  onCancel: () => void;
-}
-
 const genderOptions: GenderOption[] = [
   { value: Gender.Male, label: "Male" },
   { value: Gender.Female, label: "Female" },
   { value: Gender.Other, label: "Other" },
 ];
 
-export const AddPatientForm = ({ onSubmit, onCancel }: Props) => {
+export const AddPatientForm = ({ onSubmit, onCancel }: FormProps<PatientFormValues>) => {
   return (
     <Formik
       initialValues={{

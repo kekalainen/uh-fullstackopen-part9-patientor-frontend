@@ -3,10 +3,12 @@ import axios from "axios";
 import { Box, Table, Button, TableHead, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
 
-import { PatientFormValues } from "../AddPatientModal/AddPatientForm";
-import AddPatientModal from "../AddPatientModal";
+import AddPatientForm, {
+  PatientFormValues,
+} from "../AddPatientModal/AddPatientForm";
 import { Patient } from "../types";
 import { apiBaseUrl } from "../constants";
+import FormModal from "../components/FormModal";
 import HealthRatingBar from "../components/HealthRatingBar";
 import { addPatient, useStateValue } from "../state";
 import { TableCell } from "@material-ui/core";
@@ -76,11 +78,13 @@ const PatientListPage = () => {
           ))}
         </TableBody>
       </Table>
-      <AddPatientModal
+      <FormModal
+        title="Add a new patient"
         modalOpen={modalOpen}
         onSubmit={submitNewPatient}
         error={error}
         onClose={closeModal}
+        formComponent={AddPatientForm}
       />
       <Button variant="contained" onClick={() => openModal()}>
         Add New Patient
