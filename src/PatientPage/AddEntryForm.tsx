@@ -20,6 +20,23 @@ const healthCheckOptions: SelectOption<HealthCheckRating>[] = [
     })),
 ];
 
+type Dictionary<T> = { [field: string]: T };
+
+const validationErrorMessages: Dictionary<string> = {
+  required: "This field is required",
+  date: "Incorrect date format",
+};
+
+const validators: Dictionary<(value: string) => string | undefined> = {
+  required: (value: string) => {
+    if (!value) return validationErrorMessages.required;
+  },
+  date: (value: string) => {
+    if (!value) return validationErrorMessages.required;
+    if (!Date.parse(value)) return validationErrorMessages.date;
+  },
+};
+
 const typeSpecificInitialValues = (type: Entry["type"]): object => {
   switch (type) {
     case "HealthCheck":
@@ -49,16 +66,13 @@ export const AddEntryForm = ({
       }}
       onSubmit={onSubmit}
       validate={(values) => {
-        const errors: { [field: string]: string } = {};
+        const errors: Dictionary<string> = {};
 
         for (const key of Object.keys(values)) {
           const value = { ...values }[key];
           if (typeof value === "string" && value.length === 0)
-            errors[key] = "This field is required";
+            errors[key] = validationErrorMessages.required;
         }
-
-        if (values.date && !Date.parse(values.date))
-          errors.date = "Incorrect date format";
 
         return errors;
       }}
@@ -75,6 +89,7 @@ export const AddEntryForm = ({
             placeholder="YYYY-MM-DD"
             name="date"
             component={TextField}
+            validate={validators.date}
           ></Field>
           <Field
             label="Specialist"
