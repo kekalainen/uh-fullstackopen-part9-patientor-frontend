@@ -1,9 +1,9 @@
 import React from "react";
-import { Grid, Button } from "@material-ui/core";
 import { Field, Formik, Form } from "formik";
 
 import { TextField, SelectField, GenderOption } from "../components/FormFields";
 import { Gender, Patient } from "../types";
+import { FormActions } from "../components/FormActions";
 import { FormProps } from "../components/FormModal";
 
 /*
@@ -75,31 +75,7 @@ export const AddPatientForm = ({ onSubmit, onCancel }: FormProps<PatientFormValu
               component={TextField}
             />
             <SelectField label="Gender" name="gender" options={genderOptions} />
-            <Grid>
-              <Grid item>
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  style={{ float: "left" }}
-                  type="button"
-                  onClick={onCancel}
-                >
-                  Cancel
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  style={{
-                    float: "right",
-                  }}
-                  type="submit"
-                  variant="contained"
-                  disabled={!dirty || !isValid}
-                >
-                  Add
-                </Button>
-              </Grid>
-            </Grid>
+            <FormActions dirty={dirty} isValid={isValid} onCancel={onCancel} />
           </Form>
         );
       }}
