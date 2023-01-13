@@ -48,6 +48,20 @@ export const AddEntryForm = ({
         ...typeSpecificInitialValues(EntryTypes[0]),
       }}
       onSubmit={onSubmit}
+      validate={(values) => {
+        const errors: { [field: string]: string } = {};
+
+        for (const key of Object.keys(values)) {
+          const value = { ...values }[key];
+          if (typeof value === "string" && value.length === 0)
+            errors[key] = "This field is required";
+        }
+
+        if (values.date && !Date.parse(values.date))
+          errors.date = "Incorrect date format";
+
+        return errors;
+      }}
     >
       {({ isValid, dirty, setFieldValue, setFieldTouched, values }) => (
         <Form>
